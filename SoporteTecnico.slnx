@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="SoporteTecnico/SoporteTecnico.csproj" />
+  <Project Path="SoporteTecnico.BL/SoporteTecnico.BL.csproj" />
+  <Project Path="SoporteTecnico.DAL/SoporteTecnico.DAL.csproj" />
+  <Project Path="SoporteTecnico.EN/SoporteTecnico.EN.csproj" />
+  <Project Path="SoporteTecnico.Tests/SoporteTecnico.Tests.csproj" />
+  <Project Path="SoporteTecnico.Web/SoporteTecnico.Web.csproj" />
 </Solution>

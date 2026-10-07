@@ -7,6 +7,6 @@ namespace SoporteTecnico.EN.Entidades
         public int IdRol { get; set; }
         public string Nombre { get; set; } = string.Empty;
 
-        public ICollection<RolUsuario> Usuarios { get; set; } = new List<Usuario>();
+        public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
     }
 }

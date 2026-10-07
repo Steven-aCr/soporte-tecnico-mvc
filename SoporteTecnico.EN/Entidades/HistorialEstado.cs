@@ -1,11 +1,12 @@
 ﻿
 using SoporteTecnico.EN.Enumeraciones;
+using System;
 
 namespace SoporteTecnico.EN.Entidades
 {
     public class HistorialEstado
     {
-        public int IdHistorialEstado { get; set; }
+       public int IdHistorial { get; set; }
         public EstadoTicket? EstadoAnterior { get; set; }
         public EstadoTicket EstadoNuevo { get; set; }
         public DateTime FechaCambio { get; set; } = DateTime.Now;
