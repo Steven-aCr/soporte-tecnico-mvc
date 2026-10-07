@@ -1,0 +1,133 @@
+@startuml
+title SoporteTecnicoDB — Diagrama de base de datos
+
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+
+entity "Rol" as Rol {
+    * IdRol : INT <<PK, IDENTITY>>
+    --
+    * Nombre : NVARCHAR(30) <<UNIQUE>>
+}
+
+entity "Usuario" as Usuario {
+    * IdUsuario : INT <<PK, IDENTITY>>
+    --
+    * Nombre : NVARCHAR(100)
+    * Correo : NVARCHAR(150) <<UNIQUE>>
+    * PasswordHash : NVARCHAR(512)
+    * Activo : BIT = 1
+    * IdRol : INT <<FK>>
+}
+
+entity "Categoria" as Categoria {
+    * IdCategoria : INT <<PK, IDENTITY>>
+    --
+    * Nombre : NVARCHAR(60) <<UNIQUE>>
+    Descripcion : NVARCHAR(250)
+    * Activo : BIT = 1
+}
+
+entity "Ticket" as Ticket {
+    * IdTicket : INT <<PK, IDENTITY>>
+    --
+    * Titulo : NVARCHAR(150)
+    * Descripcion : NVARCHAR(2000)
+    * Prioridad : INT = 2
+    * Estado : INT = 1
+    * FechaCreacion : DATETIME2(0)
+    FechaCierre : DATETIME2(0)
+    Solucion : NVARCHAR(2000)
+    * IdCategoria : INT <<FK>>
+    * IdSolicitante : INT <<FK>>
+    IdTecnico : INT <<FK>>
+}
+
+entity "Comentario" as Comentario {
+    * IdComentario : INT <<PK, IDENTITY>>
+    --
+    * Contenido : NVARCHAR(2000)
+    * FechaCreacion : DATETIME2(0)
+    * IdTicket : INT <<FK>>
+    * IdUsuario : INT <<FK>>
+}
+
+entity "HistorialEstado" as HistorialEstado {
+    * IdHistorialEstado : INT <<PK, IDENTITY>>
+    --
+    EstadoAnterior : INT
+    * EstadoNuevo : INT
+    * FechaCambio : DATETIME2(0)
+    * IdTicket : INT <<FK>>
+    * IdUsuario : INT <<FK>>
+}
+
+Rol ||--o{ Usuario : tiene
+Categoria ||--o{ Ticket : clasifica
+
+Usuario ||--o{ Ticket : solicita
+Usuario |o--o{ Ticket : atiende
+
+Ticket ||--o{ Comentario : contiene
+Usuario ||--o{ Comentario : escribe
+
+Ticket ||--o{ HistorialEstado : registra
+Usuario ||--o{ HistorialEstado : realiza
+
+note right of Ticket
+    Prioridad:
+    1 = Baja
+    2 = Media
+    3 = Alta
+
+    Estado:
+    1 = Pendiente
+    2 = EnProceso
+    3 = Resuelto
+    4 = Cerrado
+
+    Estado distinto de Pendiente:
+    requiere tecnico.
+
+    Resuelto o Cerrado:
+    requiere solucion no vacia.
+
+    Cerrado:
+    requiere FechaCierre >= FechaCreacion.
+
+    Otros estados:
+    FechaCierre debe ser NULL.
+end note
+
+note right of HistorialEstado
+    EstadoAnterior y EstadoNuevo:
+    valores del 1 al 4.
+
+    EstadoAnterior NULL:
+    creacion inicial, EstadoNuevo = 1.
+
+    En otros cambios:
+    EstadoAnterior <> EstadoNuevo.
+end note
+
+note bottom of Comentario
+    Contenido no puede estar vacio.
+end note
+
+legend bottom
+    * = Campo obligatorio (NOT NULL)
+    Sin * = Campo que permite NULL
+    PK = Clave primaria
+    FK = Clave foranea
+    IDENTITY = Autoincremental
+    UNIQUE = Valor unico
+
+    Fechas automaticas:
+    SYSUTCDATETIME() — UTC
+
+    Las relaciones permiten cero o muchos
+    registros hijos y no tienen borrado en cascada.
+endlegend
+
+@enduml
