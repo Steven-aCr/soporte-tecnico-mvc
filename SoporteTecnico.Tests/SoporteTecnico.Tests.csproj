@@ -12,6 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SoporteTecnico.BL\SoporteTecnico.BL.csproj" />
+    <ProjectReference Include="..\SoporteTecnico.DAL\SoporteTecnico.DAL.csproj" />
+    <ProjectReference Include="..\SoporteTecnico.EN\SoporteTecnico.EN.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
