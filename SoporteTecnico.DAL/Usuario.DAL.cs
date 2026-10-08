@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SoporteTecnico.EN.Entidades;
+using SoporteTecnico.EN.Enumeraciones;
 
 namespace SoporteTecnico.DAL
 {
@@ -34,7 +35,21 @@ namespace SoporteTecnico.DAL
             {
                 using (var dbContexto = new DbContexto())
                 {
-                    dbContexto.Update(pUsuario);
+                    var usuario = await dbContexto.Usuario.FirstOrDefaultAsync(
+                        u => u.IdUsuario == pUsuario.IdUsuario);
+
+                    if (usuario == null)
+                        throw new Exception($"No se encontró el usuario con ID {pUsuario.IdUsuario}.");
+
+                    usuario.Nombre = pUsuario.Nombre;
+                    usuario.Correo = pUsuario.Correo;
+                    usuario.IdRol = pUsuario.IdRol;
+                    usuario.Activo = pUsuario.Activo;
+
+                    if (!string.IsNullOrEmpty(pUsuario.PasswordHash))
+                        usuario.PasswordHash = pUsuario.PasswordHash;
+
+                    dbContexto.Update(usuario);
                     result = await dbContexto.SaveChangesAsync();
                 }
             }
@@ -79,7 +94,7 @@ namespace SoporteTecnico.DAL
             }
         }
 
-        public static async Task<List<Usuario>> ListarAsync()
+        public static async Task<List<Usuario>> ObtenerTodosAsync()
         {
             try
             {
@@ -87,6 +102,7 @@ namespace SoporteTecnico.DAL
                 {
                     return await dbContexto.Usuario
                         .Include(u => u.Rol)
+                        .OrderBy(u => u.Nombre)
                         .ToListAsync();
                 }
             }
@@ -96,15 +112,18 @@ namespace SoporteTecnico.DAL
             }
         }
 
-        public static async Task<List<Usuario>> ListarTecnicosActivosAsync()
+        public static async Task<List<Usuario>> ObtenerTecnicosActivosAsync()
         {
             try
             {
                 using (var dbContexto = new DbContexto())
                 {
+                    int idRolTecnico = (int)RolUsuario.Tecnico;
+
                     return await dbContexto.Usuario
                         .Include(u => u.Rol)
-                        .Where(u => u.IdRol == 2)
+                        .Where(u => u.IdRol == idRolTecnico && u.Activo)
+                        .OrderBy(u => u.Nombre)
                         .ToListAsync();
                 }
             }

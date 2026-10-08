@@ -1,16 +1,17 @@
-﻿using SoporteTecnico.BL.Excepciones;
-using SoporteTecnico.DAL;
-using SoporteTecnico.EN.Entidades;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
+using SoporteTecnico.BL.Excepciones;
+using SoporteTecnico.DAL;
+using SoporteTecnico.EN;
+using SoporteTecnico.EN.Entidades;
 
 namespace SoporteTecnico.BL
 {
     public class CategoriaBL
     {
-        private const int NombreMaxLength = 100;
-        private const int DescripcionMaxLength = 250;
+        private const int NombreMaxLength = LongitudesCampo.CategoriaNombre;
+        private const int DescripcionMaxLength = LongitudesCampo.CategoriaDescripcion;
 
         public async Task<int> GuardarAsync(Categoria pCategoria)
         {

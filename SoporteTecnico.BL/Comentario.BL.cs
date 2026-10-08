@@ -3,33 +3,37 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SoporteTecnico.BL.Excepciones;
 using SoporteTecnico.DAL;
+using SoporteTecnico.EN;
 using SoporteTecnico.EN.Entidades;
+using SoporteTecnico.EN.Enumeraciones;
 
 namespace SoporteTecnico.BL
 {
     public class ComentarioBL
     {
-        private const int ContenidoMaxLength = 1000;
+        private const int ContenidoMaxLength = LongitudesCampo.ComentarioContenido;
+
         public async Task<int> GuardarAsync(Comentario pComentario)
         {
             Validar(pComentario);
             Normalizar(pComentario);
 
-            var ticket = await TicketDAL.ObtenerPorIdAsync(pComentario.IdTicket);
-            if (ticket.IdTicket == 0)
-                throw new ReglaNegocioException("El ticket al que intenta comentar no existe.");
+            var actor = await TicketBL.ObtenerActorAsync(pComentario.IdUsuario);
+            var ticket = await TicketBL.ObtenerExistenteAsync(pComentario.IdTicket);
+            TicketBL.ValidarAcceso(actor, ticket);
 
-            if (ticket.FechaCierre.HasValue)
+            if (ticket.Estado == EstadoTicket.Cerrado)
                 throw new ReglaNegocioException("No se pueden agregar comentarios a un ticket cerrado.");
 
-            pComentario.FechaCreacion = DateTime.Now;
+            pComentario.FechaCreacion = DateTime.UtcNow;
             return await ComentarioDAL.GuardarAsync(pComentario);
         }
 
-        public async Task<List<Comentario>> ObtenerPorTicketAsync(int pIdTicket)
+        public async Task<List<Comentario>> ObtenerPorTicketAsync(int pIdActor, int pIdTicket)
         {
-            if (pIdTicket <= 0)
-                throw new ReglaNegocioException("El identificador del ticket no es válido.");
+            var actor = await TicketBL.ObtenerActorAsync(pIdActor);
+            var ticket = await TicketBL.ObtenerExistenteAsync(pIdTicket);
+            TicketBL.ValidarAcceso(actor, ticket);
 
             return await ComentarioDAL.ObtenerPorTicketAsync(new Comentario { IdTicket = pIdTicket });
         }

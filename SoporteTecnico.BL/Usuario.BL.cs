@@ -4,14 +4,15 @@ using System.Threading.Tasks;
 using SoporteTecnico.BL.Excepciones;
 using SoporteTecnico.BL.Seguridad;
 using SoporteTecnico.DAL;
+using SoporteTecnico.EN;
 using SoporteTecnico.EN.Entidades;
 
 namespace SoporteTecnico.BL
 {
     public class UsuarioBL
     {
-        private const int NombreMaxLength = 100;
-        private const int CorreoMaxLength = 150;
+        private const int NombreMaxLength = LongitudesCampo.UsuarioNombre;
+        private const int CorreoMaxLength = LongitudesCampo.UsuarioCorreo;
         private const int PasswordMinLength = 8;
 
         public async Task<int> RegistrarAsync(Usuario pUsuario, string pPassword)
@@ -19,6 +20,9 @@ namespace SoporteTecnico.BL
             Validar(pUsuario);
             ValidarPassword(pPassword);
             Normalizar(pUsuario);
+
+            if (await RolDAL.ObtenerPorIdAsync(new Rol { IdRol = pUsuario.IdRol }) == null)
+                throw new ReglaNegocioException("El rol seleccionado no existe.");
 
             var existente = await UsuarioDAL.ObtenerPorCorreoAsync(pUsuario.Correo);
             if (existente != null)
