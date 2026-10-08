@@ -27,6 +27,46 @@ namespace SoporteTecnico.DAL
             return result;
         }
 
+        public static async Task<int> ModificarAsync(Ticket pTicket)
+        {
+            int result = 0;
+            try
+            {
+                using (var dbContexto = new DbContexto())
+                {
+                    dbContexto.Update(pTicket);
+                    result = await dbContexto.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return result;
+        }
+
+        public static async Task<Ticket> ObtenerPorIdAsync(int id)
+        {
+            try
+            {
+                using (var dbContexto = new DbContexto())
+                {
+                    var ticket = await dbContexto.Ticket
+                        .Include(t => t.Categoria)
+                        .Include(t => t.Solicitante)
+                        .Include(t => t.Tecnico)
+                        .Include(t => t.Historial)
+                        .FirstOrDefaultAsync(t => t.IdTicket == id);
+
+                    return ticket ?? new Ticket();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public static async Task<List<Ticket>> ObtenerTodosAsync()
         {
             try
@@ -47,25 +87,23 @@ namespace SoporteTecnico.DAL
             }
         }
 
-        public static async Task<Ticket> ObtenerPorIdAsync(int id)
+        public static async Task<int> CambiarEstadoYRegistrarHistorialAsync(Ticket pTicket, HistorialEstado pHistorial)
         {
+            int result = 0;
             try
             {
                 using (var dbContexto = new DbContexto())
                 {
-                    var ticket = await dbContexto.Ticket
-                        .Include(t => t.Categoria)
-                        .Include(t => t.Solicitante)
-                        .Include(t => t.Tecnico)
-                        .FirstOrDefaultAsync(t => t.IdTicket == id);
-
-                    return ticket ?? new Ticket();
+                    dbContexto.Update(pTicket);
+                    dbContexto.Add(pHistorial);
+                    result = await dbContexto.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return result;
         }
     }
 }
