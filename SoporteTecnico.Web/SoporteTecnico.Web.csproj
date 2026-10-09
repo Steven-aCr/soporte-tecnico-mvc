@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SoporteTecnico.BL\SoporteTecnico.BL.csproj" />
     <ProjectReference Include="..\SoporteTecnico.DAL\SoporteTecnico.DAL.csproj" />
     <ProjectReference Include="..\SoporteTecnico.EN\SoporteTecnico.EN.csproj" />

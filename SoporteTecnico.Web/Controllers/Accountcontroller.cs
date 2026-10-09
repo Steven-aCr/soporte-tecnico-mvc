@@ -40,7 +40,14 @@ namespace SoporteTecnico.Web.Controllers
 
             try
             {
+                // Intentar validar las credenciales con la capa de negocio
                 var usuario = await _usuarioBL.IniciarSesionAsync(model.Correo, model.Password);
+
+                if (usuario == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Correo o contraseña incorrectos.");
+                    return View(model);
+                }
 
                 var claims = new List<Claim>
                 {
@@ -62,14 +69,15 @@ namespace SoporteTecnico.Web.Controllers
             }
             catch (ReglaNegocioException ex)
             {
+                // Errores controlados de lógica de negocio (ej. cuenta inactiva o credenciales inválidas)
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return View(model);
             }
             catch (Exception ex)
             {
-                // Error técnico (por ejemplo, la base de datos no responde): se registra y no se muestra el detalle.
-                _logger.LogError(ex, "Error al iniciar sesión.");
-                ModelState.AddModelError(string.Empty, "Ocurrió un error inesperado. Intente de nuevo más tarde.");
+                // Error técnico interno (ej. problemas con la base de datos o conexión MySQL)
+                _logger.LogError(ex, "Error crítico al iniciar sesión para el correo: {Correo}", model.Correo);
+                ModelState.AddModelError(string.Empty, "Ocurrió un error inesperado al conectar con la base de datos. Verifique su conexión.");
                 return View(model);
             }
         }
