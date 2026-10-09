@@ -1,0 +1,59 @@
+﻿@using SoporteTecnico.EN.Enumeraciones
+@model SoporteTecnico.Web.ViewModels.Tickets.TicketCreateViewModel
+@{
+    ViewData["Title"] = "Nuevo ticket";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-app">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="h4 fw-bold mb-4">Nuevo ticket</h1>
+
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label"></label>
+                        <input asp-for="Titulo" class="form-control" />
+                        <span asp-validation-for="Titulo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdCategoria" class="form-label"></label>
+                            <select asp-for="IdCategoria" asp-items="Model.Categorias" class="form-select">
+                                <option value="0">Seleccione una categoría</option>
+                            </select>
+                            <span asp-validation-for="IdCategoria" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Prioridad" class="form-label"></label>
+                            <select name="Prioridad" id="Prioridad" class="form-select">
+                                <option value="1" selected="@(Model.Prioridad == PrioridadTicket.Baja)">Baja</option>
+                                <option value="2" selected="@(Model.Prioridad == PrioridadTicket.Media)">Media</option>
+                                <option value="3" selected="@(Model.Prioridad == PrioridadTicket.Alta)">Alta</option>
+                            </select>
+                            <span asp-validation-for="Prioridad" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Descripcion" class="form-label"></label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a class="btn btn-outline-secondary" asp-action="Index">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Crear ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

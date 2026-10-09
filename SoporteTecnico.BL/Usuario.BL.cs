@@ -65,7 +65,75 @@ namespace SoporteTecnico.BL
 
             return usuario;
         }
+        public async Task<List<Usuario>> ObtenerTodosAsync()
+        {
+            var usuarios = await UsuarioDAL.ObtenerTodosAsync();
+            foreach (var u in usuarios)
+                u.PasswordHash = string.Empty;
+            return usuarios;
+        }
 
+        public async Task<List<Usuario>> ObtenerTecnicosActivosAsync()
+        {
+            var tecnicos = await UsuarioDAL.ObtenerTecnicosActivosAsync();
+            foreach (var t in tecnicos)
+                t.PasswordHash = string.Empty;
+            return tecnicos;
+        }
+
+        public async Task<List<Rol>> ObtenerRolesAsync()
+        {
+            return await RolDAL.ObtenerTodosAsync();
+        }
+
+        public async Task<Usuario> ObtenerPorIdAsync(int pIdUsuario)
+        {
+            if (pIdUsuario <= 0)
+                throw new ReglaNegocioException("El identificador del usuario no es válido.");
+
+            var usuario = await UsuarioDAL.ObtenerPorIdAsync(pIdUsuario);
+            if (usuario == null)
+                throw new ReglaNegocioException("El usuario no existe.");
+
+            usuario.PasswordHash = string.Empty;
+            return usuario;
+        }
+
+        public async Task<int> ModificarAsync(Usuario pUsuario)
+        {
+            Validar(pUsuario);
+            Normalizar(pUsuario);
+
+            var existente = await UsuarioDAL.ObtenerPorIdAsync(pUsuario.IdUsuario);
+            if (existente == null)
+                throw new ReglaNegocioException("El usuario no existe.");
+
+            if (await RolDAL.ObtenerPorIdAsync(new Rol { IdRol = pUsuario.IdRol }) == null)
+                throw new ReglaNegocioException("El rol seleccionado no existe.");
+
+            var otro = await UsuarioDAL.ObtenerPorCorreoAsync(pUsuario.Correo);
+            if (otro != null && otro.IdUsuario != pUsuario.IdUsuario)
+                throw new ReglaNegocioException($"Ya existe un usuario registrado con el correo '{pUsuario.Correo}'.");
+
+            // Solo cambian nombre, correo y rol; el estado y la contraseña se conservan.
+            existente.Nombre = pUsuario.Nombre;
+            existente.Correo = pUsuario.Correo;
+            existente.IdRol = pUsuario.IdRol;
+            return await UsuarioDAL.ModificarAsync(existente);
+        }
+
+        public async Task<int> CambiarEstadoAsync(int pIdUsuario, bool pActivo)
+        {
+            if (pIdUsuario <= 0)
+                throw new ReglaNegocioException("El identificador del usuario no es válido.");
+
+            var usuario = await UsuarioDAL.ObtenerPorIdAsync(pIdUsuario);
+            if (usuario == null)
+                throw new ReglaNegocioException("El usuario no existe.");
+
+            usuario.Activo = pActivo;
+            return await UsuarioDAL.ModificarAsync(usuario);
+        }
         // ---------- Reglas de negocio ----------
 
         private static void Validar(Usuario pUsuario)

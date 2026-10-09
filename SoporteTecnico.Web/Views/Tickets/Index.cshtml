@@ -1,0 +1,68 @@
+﻿@using SoporteTecnico.EN.Enumeraciones
+@model SoporteTecnico.Web.ViewModels.Tickets.TicketIndexViewModel
+@{
+    ViewData["Title"] = "Tickets";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h4 fw-bold mb-0">Tickets</h1>
+    @if (User.IsInRole("Solicitante"))
+    {
+        <a class="btn btn-primary" asp-action="Create">Nuevo ticket</a>
+    }
+</div>
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-sm-5 col-md-3">
+        <select name="estado" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos los estados</option>
+            <option value="1" selected="@(Model.Estado == EstadoTicket.Pendiente)">Pendiente</option>
+            <option value="2" selected="@(Model.Estado == EstadoTicket.EnProceso)">En proceso</option>
+            <option value="3" selected="@(Model.Estado == EstadoTicket.Resuelto)">Resuelto</option>
+            <option value="4" selected="@(Model.Estado == EstadoTicket.Cerrado)">Cerrado</option>
+        </select>
+    </div>
+</form>
+
+<div class="card card-app">
+    @if (!Model.Tickets.Any())
+    {
+        <div class="card-body text-center text-muted py-5">No hay tickets para mostrar.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Prioridad</th>
+                        <th>Estado</th>
+                        <th>Solicitante</th>
+                        <th>Técnico</th>
+                        <th>Creado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Tickets)
+                    {
+                        <tr>
+                            <td class="text-muted">@t.IdTicket</td>
+                            <td>
+                                <a class="fw-semibold text-decoration-none" asp-action="Details" asp-route-id="@t.IdTicket">@t.Titulo</a>
+                            </td>
+                            <td>@t.Categoria?.Nombre</td>
+                            <td><partial name="_PrioridadBadge" model="t.Prioridad" /></td>
+                            <td><partial name="_EstadoBadge" model="t.Estado" /></td>
+                            <td>@t.Solicitante?.Nombre</td>
+                            <td>@(t.Tecnico?.Nombre ?? "Sin asignar")</td>
+                            <td class="text-nowrap">@t.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

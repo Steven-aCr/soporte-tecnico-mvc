@@ -1,0 +1,12 @@
+﻿@using SoporteTecnico.EN.Enumeraciones
+@model PrioridadTicket
+@{
+    var (clase, texto) = Model switch
+    {
+        PrioridadTicket.Alta => ("bg-danger", "Alta"),
+        PrioridadTicket.Media => ("bg-info text-dark", "Media"),
+        PrioridadTicket.Baja => ("bg-light text-dark border", "Baja"),
+        _ => ("bg-light text-dark", Model.ToString())
+    };
+}
+<span class="badge rounded-pill @clase">@texto</span>

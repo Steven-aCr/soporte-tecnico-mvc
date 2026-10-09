@@ -42,6 +42,17 @@ namespace SoporteTecnico.BL
             ValidarId(pCategoria);
             return await CategoriaDAL.EliminarAsync(pCategoria);
         }
+        public async Task<int> ReactivarAsync(int pIdCategoria)
+        {
+            ValidarId(new Categoria { IdCategoria = pIdCategoria });
+
+            var categoria = await CategoriaDAL.ObtenerPorIdAsync(new Categoria { IdCategoria = pIdCategoria });
+            if (categoria == null)
+                throw new ReglaNegocioException("La categoría no existe.");
+
+            categoria.Activo = true;
+            return await CategoriaDAL.ModificarAsync(categoria);
+        }
 
         public async Task<Categoria?> ObtenerPorIdAsync(Categoria pCategoria)
         {

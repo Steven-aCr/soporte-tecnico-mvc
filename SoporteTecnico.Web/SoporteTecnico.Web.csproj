@@ -16,10 +16,4 @@
     <ProjectReference Include="..\SoporteTecnico.EN\SoporteTecnico.EN.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\Categorias\" />
-    <Folder Include="Views\Tickets\" />
-    <Folder Include="Views\Usuarios\" />
-  </ItemGroup>
-
 </Project>
