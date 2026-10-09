@@ -4,7 +4,10 @@
     var rol = User.FindFirst(ClaimTypes.Role)?.Value;
 }
 
-<div class="text-center mt-4">
-    <h1 class="display-6">Bienvenido, @User.Identity?.Name</h1>
-    <p class="lead text-muted">Rol: @rol</p>
+<div class="card card-app hero-card text-white">
+    <div class="card-body p-4 p-md-5">
+        <span class="badge rounded-pill role-badge mb-3">@rol</span>
+        <h1 class="display-6 fw-bold mb-2">Bienvenido, @User.Identity?.Name</h1>
+        <p class="lead mb-0 opacity-75">Gestiona tus solicitudes de soporte desde un solo lugar.</p>
+    </div>
 </div>

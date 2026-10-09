@@ -10,6 +10,10 @@ namespace SoporteTecnico.DAL
 {
     public class TicketDAL
     {
+        /// <summary>
+        /// Guarda un ticket nuevo. Si se agrega un HistorialEstado a pTicket.Historial antes de llamar,
+        /// EF guarda ambos en el mismo SaveChanges.
+        /// </summary>
         public static async Task<int> GuardarAsync(Ticket pTicket)
         {
             int result = 0;
@@ -28,6 +32,10 @@ namespace SoporteTecnico.DAL
             return result;
         }
 
+        /// <summary>
+        /// Actualiza Estado, IdTecnico, Solucion y FechaCierre. Se usa para asignar un técnico
+        /// (el estado no cambia, por lo tanto no hay historial).
+        /// </summary>
         public static async Task<int> ModificarAsync(Ticket pTicket)
         {
             int result = 0;
@@ -54,6 +62,10 @@ namespace SoporteTecnico.DAL
             return result;
         }
 
+        /// <summary>
+        /// Cambia el estado del ticket y registra el historial en un solo SaveChanges,
+        /// así no puede quedar guardado uno sin el otro.
+        /// </summary>
         public static async Task<int> CambiarEstadoAsync(Ticket pTicket, HistorialEstado pHistorial)
         {
             int result = 0;
@@ -83,6 +95,10 @@ namespace SoporteTecnico.DAL
             return result;
         }
 
+        /// <summary>
+        /// Lista tickets con filtros opcionales: solicitante (para el rol Solicitante),
+        /// técnico (para el rol Técnico) y estado. Sin filtros devuelve todos.
+        /// </summary>
         public static async Task<List<Ticket>> ObtenerTodosAsync(
             int? pIdSolicitante = null,
             int? pIdTecnico = null,
@@ -99,7 +115,7 @@ namespace SoporteTecnico.DAL
                         .Where(t =>
                             (pIdSolicitante == null || t.IdSolicitante == pIdSolicitante) &&
                             (pIdTecnico == null || t.IdTecnico == pIdTecnico) &&
-                            (pEstado == null || t.Estado == pEstado))
+                            (pEstado == null || t.Estado == pEstado.Value))
                         .OrderByDescending(t => t.FechaCreacion)
                         .ToListAsync();
                 }

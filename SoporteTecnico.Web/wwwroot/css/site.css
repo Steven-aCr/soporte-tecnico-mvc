@@ -1,31 +1,152 @@
+:root {
+    --app-primary: #4f46e5;
+    --app-primary-dark: #4338ca;
+    --app-accent: #7c3aed;
+    --app-bg: #f3f4f9;
+    --app-text: #1f2937;
+    --app-radius: 14px;
+}
+
 html {
-  font-size: 14px;
+    font-size: 15px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--app-bg);
+    color: var(--app-text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+main {
+    flex: 1 0 auto;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* Evita la caja roja vacía cuando no hay errores de validación */
+.validation-summary-valid {
+    display: none;
+}
+
+/* ---------- Barra superior ---------- */
+.navbar-app {
+    background: linear-gradient(90deg, #1e1b4b, var(--app-primary-dark));
+}
+
+    .navbar-app .navbar-brand {
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+    .navbar-app .nav-link {
+        color: rgba(255, 255, 255, .85);
+        border-radius: 8px;
+        padding: .45rem .85rem;
+    }
+
+        .navbar-app .nav-link:hover,
+        .navbar-app .nav-link:focus {
+            color: #fff;
+            background-color: rgba(255, 255, 255, .12);
+        }
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, .2);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ---------- Tarjetas ---------- */
+.card-app {
+    border: 0;
+    border-radius: var(--app-radius);
+    box-shadow: 0 10px 30px rgba(31, 41, 55, .08);
+}
+
+/* ---------- Botones y formularios ---------- */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.btn-primary {
+    --bs-btn-bg: var(--app-primary);
+    --bs-btn-border-color: var(--app-primary);
+    --bs-btn-hover-bg: var(--app-primary-dark);
+    --bs-btn-hover-border-color: var(--app-primary-dark);
+    --bs-btn-active-bg: #3730a3;
+    --bs-btn-active-border-color: #3730a3;
+    --bs-btn-disabled-bg: var(--app-primary);
+    --bs-btn-disabled-border-color: var(--app-primary);
+}
+
+.form-control,
+.form-select {
+    border-radius: 10px;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--app-primary);
+        box-shadow: 0 0 0 .2rem rgba(79, 70, 229, .2);
+    }
+
+/* ---------- Login ---------- */
+.auth-wrapper {
+    min-height: calc(100vh - 220px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 430px;
+}
+
+.brand-badge {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--app-primary), var(--app-accent));
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+/* ---------- Inicio ---------- */
+.hero-card {
+    background: linear-gradient(135deg, var(--app-primary), var(--app-accent));
+}
+
+.role-badge {
+    background-color: rgba(255, 255, 255, .2);
+    color: #fff;
+    font-weight: 500;
+    padding: .45rem .9rem;
+}
+
+/* ---------- Pie de página ---------- */
+.site-footer {
+    flex-shrink: 0;
+    border-top: 1px solid #e5e7eb;
+    background-color: #fff;
 }

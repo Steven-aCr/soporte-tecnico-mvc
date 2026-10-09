@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 using SoporteTecnico.BL.Excepciones;
 using SoporteTecnico.DAL;
 using SoporteTecnico.EN;
 using SoporteTecnico.EN.Entidades;
 using SoporteTecnico.EN.Enumeraciones;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SoporteTecnico.BL
 {
@@ -13,52 +14,34 @@ namespace SoporteTecnico.BL
     {
         private const int ContenidoMaxLength = LongitudesCampo.ComentarioContenido;
 
-        public async Task<int> GuardarAsync(Comentario pComentario)
+        // Método auxiliar para obtener el usuario/actor actual (por ejemplo, por ID)
+        public static async Task<Usuario?> ObtenerActorAsync(int idUsuario)
         {
-            Validar(pComentario);
-            Normalizar(pComentario);
-
-            var actor = await TicketBL.ObtenerActorAsync(pComentario.IdUsuario);
-            var ticket = await TicketBL.ObtenerExistenteAsync(pComentario.IdTicket);
-            TicketBL.ValidarAcceso(actor, ticket);
-
-            if (ticket.Estado == EstadoTicket.Cerrado)
-                throw new ReglaNegocioException("No se pueden agregar comentarios a un ticket cerrado.");
-
-            pComentario.FechaCreacion = DateTime.UtcNow;
-            return await ComentarioDAL.GuardarAsync(pComentario);
+            using (var dbContexto = new DbContexto())
+            {
+                return await dbContexto.Usuario
+                    .Include(u => u.Rol)
+                    .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+            }
         }
 
-        public async Task<List<Comentario>> ObtenerPorTicketAsync(int pIdActor, int pIdTicket)
+        // Método auxiliar para verificar si un ticket existe antes de modificarlo/consultarlo
+        public static async Task<Ticket?> ObtenerExistenteAsync(int idTicket)
         {
-            var actor = await TicketBL.ObtenerActorAsync(pIdActor);
-            var ticket = await TicketBL.ObtenerExistenteAsync(pIdTicket);
-            TicketBL.ValidarAcceso(actor, ticket);
-
-            return await ComentarioDAL.ObtenerPorTicketAsync(new Comentario { IdTicket = pIdTicket });
+            using (var dbContexto = new DbContexto())
+            {
+                return await dbContexto.Ticket.FindAsync(idTicket);
+            }
         }
 
-        private static void Validar(Comentario pComentario)
+        // Método auxiliar para validar permisos o acceso al ticket
+        public static bool ValidarAcceso(Ticket ticket, int idUsuario, int idRol)
         {
-            if (pComentario == null)
-                throw new ReglaNegocioException("El comentario no puede ser nulo.");
+            // Si el rol es administrador (ej. Rol 1) o es el solicitante/técnico asignado, tiene acceso
+            if (idRol == 1) return true;
+            if (ticket.IdSolicitante == idUsuario || ticket.IdTecnico == idUsuario) return true;
 
-            if (pComentario.IdTicket <= 0)
-                throw new ReglaNegocioException("El comentario debe pertenecer a un ticket.");
-
-            if (pComentario.IdUsuario <= 0)
-                throw new ReglaNegocioException("El comentario debe tener un autor.");
-
-            if (string.IsNullOrWhiteSpace(pComentario.Contenido))
-                throw new ReglaNegocioException("El comentario no puede estar vacío.");
-
-            if (pComentario.Contenido.Trim().Length > ContenidoMaxLength)
-                throw new ReglaNegocioException($"El comentario no puede superar los {ContenidoMaxLength} caracteres.");
-        }
-
-        private static void Normalizar(Comentario pComentario)
-        {
-            pComentario.Contenido = pComentario.Contenido.Trim();
+            return false;
         }
     }
 }

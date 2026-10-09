@@ -1,5 +1,4 @@
-﻿
-using SoporteTecnico.EN.Enumeraciones;
+﻿using SoporteTecnico.EN.Enumeraciones;
 
 namespace SoporteTecnico.EN.Entidades
 {
@@ -23,6 +22,5 @@ namespace SoporteTecnico.EN.Entidades
 
         public ICollection<Comentario> Comentarios { get; set; } = new List<Comentario>();
         public ICollection<HistorialEstado> Historial { get; set; } = new List<HistorialEstado>();
-    
     }
 }

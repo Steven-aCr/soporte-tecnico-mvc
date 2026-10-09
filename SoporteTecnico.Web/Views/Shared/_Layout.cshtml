@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var nombreUsuario = User.Identity?.Name ?? string.Empty;
+    var inicial = nombreUsuario.Length > 0 ? nombreUsuario.Substring(0, 1).ToUpper() : "?";
+    var rolUsuario = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+}
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -11,35 +16,39 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-app shadow-sm">
+            <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Soporte Técnico</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse justify-content-between">
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                     </ul>
-                    <ul class="navbar-nav align-items-sm-center">
+                    <ul class="navbar-nav align-items-sm-center gap-sm-3">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <span class="navbar-text me-3">@User.Identity?.Name (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</span>
+                            <li class="nav-item d-flex align-items-center gap-2 text-white py-2 py-sm-0">
+                                <span class="user-avatar">@inicial</span>
+                                <span class="lh-sm">
+                                    <span class="d-block fw-semibold">@nombreUsuario</span>
+                                    <small class="text-white-50">@rolUsuario</small>
+                                </span>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Cerrar sesión</button>
+                                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
                             </li>
                         }
                     </ul>
@@ -47,17 +56,17 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+    <main role="main" class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer text-center text-muted small py-3">
         <div class="container">
             &copy; 2026 - Soporte Técnico
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -11,7 +11,8 @@ namespace SoporteTecnico.DAL
             DbContexto.ConnectionString = connectionString;
 
             services.AddDbContext<DbContexto>(options =>
-                options.UseSqlServer(connectionString));
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
