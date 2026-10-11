@@ -9,9 +9,6 @@ namespace SoporteTecnico.DAL
         /// <summary>Se asigna una vez en Program.cs desde appsettings.json.</summary>
         public static string? ConnectionString { get; set; }
 
-        // AutoDetect abre una conexión; se hace una sola vez y se reutiliza en cada DbContexto.
-        private static ServerVersion? _serverVersion;
-
         public DbSet<Rol> Rol { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
@@ -26,8 +23,7 @@ namespace SoporteTecnico.DAL
                 if (string.IsNullOrEmpty(ConnectionString))
                     throw new InvalidOperationException("La cadena de conexión no ha sido inicializada.");
 
-                _serverVersion ??= ServerVersion.AutoDetect(ConnectionString);
-                optionsBuilder.UseMySql(ConnectionString, _serverVersion);
+                optionsBuilder.UseSqlServer(ConnectionString);
             }
         }
 
@@ -39,7 +35,6 @@ namespace SoporteTecnico.DAL
             {
                 e.ToTable("Rol");
                 e.HasKey(x => x.IdRol);
-                e.Property(x => x.IdRol).ValueGeneratedNever(); // IDs fijos 1, 2, 3
                 e.Property(x => x.Nombre).IsRequired().HasMaxLength(LongitudesCampo.RolNombre);
                 e.HasIndex(x => x.Nombre).IsUnique();
             });
@@ -77,13 +72,14 @@ namespace SoporteTecnico.DAL
                 e.Property(x => x.Solucion).HasMaxLength(LongitudesCampo.TicketSolucion);
                 e.Property(x => x.Prioridad).HasConversion<int>();
                 e.Property(x => x.Estado).HasConversion<int>();
+                e.Property(x => x.FechaCreacion).HasColumnType("datetime2(0)");
+                e.Property(x => x.FechaCierre).HasColumnType("datetime2(0)");
 
                 e.HasOne(x => x.Categoria)
                  .WithMany(c => c.Tickets)
                  .HasForeignKey(x => x.IdCategoria)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // Dos relaciones distintas hacia Usuario: hay que configurarlas por separado.
                 e.HasOne(x => x.Solicitante)
                  .WithMany(u => u.TicketsSolicitados)
                  .HasForeignKey(x => x.IdSolicitante)
@@ -100,6 +96,7 @@ namespace SoporteTecnico.DAL
                 e.ToTable("Comentario");
                 e.HasKey(x => x.IdComentario);
                 e.Property(x => x.Contenido).IsRequired().HasMaxLength(LongitudesCampo.ComentarioContenido);
+                e.Property(x => x.FechaCreacion).HasColumnType("datetime2(0)");
 
                 e.HasOne(x => x.Ticket)
                  .WithMany(t => t.Comentarios)
@@ -116,10 +113,9 @@ namespace SoporteTecnico.DAL
             {
                 e.ToTable("HistorialEstado");
                 e.HasKey(x => x.IdHistorial);
-                // Si en TU tabla de MySQL la columna se llama IdHistorialEstado, quita las barras de la línea siguiente:
-                // e.Property(x => x.IdHistorial).HasColumnName("IdHistorialEstado");
                 e.Property(x => x.EstadoAnterior).HasConversion<int?>();
                 e.Property(x => x.EstadoNuevo).HasConversion<int>();
+                e.Property(x => x.FechaCambio).HasColumnType("datetime2(0)");
 
                 e.HasOne(x => x.Ticket)
                  .WithMany(t => t.Historial)
