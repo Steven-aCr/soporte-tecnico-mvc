@@ -16,7 +16,7 @@ Sistema web para gestionar tickets de soporte técnico, desarrollado con **C#**,
 - [Flujo de atención](#flujo-de-atención)
 - [Reglas de negocio](#reglas-de-negocio)
 - [Puesta en marcha](#puesta-en-marcha)
-- [Pruebas unitarias](#pruebas-unitarias)
+- [Pruebas](#pruebas)
 - [Alcance de la primera versión](#alcance-de-la-primera-versión)
 - [Contexto académico](#contexto-académico)
 
@@ -48,7 +48,7 @@ La versión de .NET se define en los archivos `.csproj` de la solución.
 - Historial de cambios de estado.
 - Búsqueda y filtros de tickets.
 - Panel con indicadores.
-- Pruebas unitarias de las reglas de negocio.
+- Pruebas de las reglas de negocio.
 
 ## Roles
 
@@ -64,11 +64,11 @@ La solución se organiza en cinco proyectos:
 
 | Proyecto | Responsabilidad |
 |---|---|
-| `SoporteTecnico.EN` | Entidades y enumeraciones. |
-| `SoporteTecnico.DAL` | Acceso a SQL Server, interfaces de acceso a datos y configuración de Entity Framework Core. |
-| `SoporteTecnico.BL` | Validaciones y reglas de negocio. |
+| `SoporteTecnico.EN` | Entidades, enumeraciones y longitudes máximas de campo. |
+| `SoporteTecnico.DAL` | Acceso a SQL Server con Entity Framework Core: contexto y clases `*DAL` estáticas. |
+| `SoporteTecnico.BL` | Validaciones, reglas de negocio, permisos y hash de contraseñas. |
 | `SoporteTecnico.Web` | Controladores, ViewModels, vistas Razor y configuración de la aplicación. |
-| `SoporteTecnico.Tests` | Pruebas unitarias de las reglas de negocio. |
+| `SoporteTecnico.Tests` | Pruebas de las reglas de negocio. |
 
 Flujo de una operación:
 
@@ -76,7 +76,13 @@ Flujo de una operación:
 Vista → Controlador → BL → DAL → SQL Server
 ```
 
-Los controladores utilizan la capa BL, que recibe las dependencias de acceso a datos mediante interfaces. Esto permite sustituirlas por implementaciones simuladas en las pruebas.
+Convenciones de la capa de datos:
+
+- Cada clase `*DAL` (`UsuarioDAL`, `TicketDAL`, etc.) es **estática** y abre su propio `DbContexto` en cada método. La cadena de conexión se asigna una vez en `DbContexto.ConnectionString`, desde `AddDataAccess` en `Program.cs`.
+- Las clases `*BL` son servicios sin estado que llaman directamente a los `*DAL`. Se registran en la inyección de dependencias con `AddSoporteTecnicoBL()`.
+- Los errores de reglas de negocio se lanzan como `ReglaNegocioException`; los controladores pueden mostrar su mensaje al usuario.
+- Los cambios de estado de un ticket y su registro de historial se guardan en un único `SaveChanges`, por lo que son atómicos.
+- `UnitOfWork` e `IUnitOfWork` existen y se registran en DI, pero las clases `*DAL` actuales no los utilizan.
 
 ### Referencias entre proyectos
 
@@ -101,13 +107,19 @@ SoporteTecnico/
 ├── SoporteTecnico.slnx
 ├── SoporteTecnico.EN/
 │   ├── Entidades/
-│   └── Enumeraciones/
+│   ├── Enumeraciones/
+│   └── LongitudesCampo.cs
 ├── SoporteTecnico.DAL/
-│   ├── Contexto/
-│   ├── Interfaces/
-│   └── Repositorios/
+│   ├── Interfaces/              (IUnitOfWork)
+│   ├── Dbcontexto.cs
+│   ├── *.DAL.cs                 (Usuario, Rol, Categoria, Ticket, Comentario, HistorialEstado)
+│   ├── UnitOfWork.cs
+│   └── ServiceCollectionExtensions.cs
 ├── SoporteTecnico.BL/
-│   └── Servicios/
+│   ├── Excepciones/
+│   ├── Seguridad/               (PasswordHasher)
+│   ├── *.BL.cs                  (Usuario, Categoria, Ticket, Comentario)
+│   └── ServiceCollectionExtensions.cs
 ├── SoporteTecnico.Web/
 │   ├── Controllers/
 │   ├── ViewModels/
@@ -116,8 +128,8 @@ SoporteTecnico/
 │   ├── appsettings.json
 │   └── Program.cs
 └── SoporteTecnico.Tests/
-    ├── Servicios/
-    └── Dobles/
+    ├── Auxiliares/
+    └── Servicios/
 ```
 
 > El archivo de solución puede ser `.sln` o `.slnx`, según el formato utilizado.
@@ -134,6 +146,8 @@ Nombre: **SoporteTecnicoDB**.
 | `Ticket` | Incidencia, prioridad, estado, solicitante, técnico y solución. |
 | `Comentario` | Mensajes asociados a cada ticket. |
 | `HistorialEstado` | Creación y cambios de estado de los tickets. |
+
+El diagrama completo está en `DiagramaBD.puml`.
 
 ### Relaciones principales
 
@@ -152,7 +166,7 @@ Nombre: **SoporteTecnicoDB**.
 | 3 | Resuelto | | 3 | Alta |
 | 4 | Cerrado | | | |
 
-Estos valores deben coincidir con las enumeraciones definidas en C#.
+Estos valores deben coincidir con las enumeraciones `EstadoTicket` y `PrioridadTicket`. Lo mismo aplica a `RolUsuario` (1 = Administrador, 2 = Tecnico, 3 = Solicitante) y los `IdRol` insertados por el script.
 
 ### Fechas
 
@@ -181,23 +195,21 @@ La creación y cada cambio de estado quedan registrados en el historial.
 
 **Tickets y estados**
 
-- Solo se pueden asignar usuarios activos con rol Técnico.
+- Solo se pueden asignar usuarios activos con rol Técnico, y solo a tickets pendientes.
 - Los nuevos tickets deben usar una categoría activa.
 - Para pasar a EnProceso, el ticket debe tener un técnico asignado.
 - Para pasar a Resuelto, debe registrarse una solución.
 - Solo se pueden cerrar tickets resueltos.
 - Los tickets cerrados no admiten nuevos comentarios.
-- Cada cambio de estado genera un registro de historial, y ambos se guardan en una misma transacción.
+- Cada cambio de estado genera un registro de historial, y ambos se guardan en una misma operación de base de datos.
 
 **Datos**
 
 - Los usuarios y categorías con registros relacionados se desactivan en lugar de eliminarse.
 - Los correos de usuarios y los nombres de categorías son únicos.
-- Las contraseñas se almacenan como hashes, nunca como texto plano.
+- Las contraseñas se almacenan como hashes, nunca como texto plano. Se usa PBKDF2-SHA256 con 100 000 iteraciones y salt aleatorio; el formato guardado es `iteraciones.salt.hash`.
 
 ## Puesta en marcha
-
-> Estas instrucciones aplican cuando la configuración y los módulos necesarios estén implementados.
 
 ### Requisitos
 
@@ -233,63 +245,69 @@ Agregar la sección `ConnectionStrings` a `SoporteTecnico.Web/appsettings.json`,
 - `TrustServerCertificate=True` es adecuado solo para desarrollo local.
 - **No publicar credenciales en el repositorio.** Si la conexión requiere usuario y contraseña, usar secretos de usuario o variables de entorno.
 
+### Registro de servicios
+
+En `Program.cs` de `SoporteTecnico.Web` deben estar ambas llamadas:
+
+```csharp
+builder.Services.AddDataAccess(connectionString);   // DAL: contexto y cadena de conexión
+builder.Services.AddSoporteTecnicoBL();             // BL: UsuarioBL, CategoriaBL, TicketBL, ComentarioBL
+```
+
 ### Gestión del esquema
 
-El script SQL crea las tablas y sus restricciones. Si se usa para preparar la base de datos, la configuración de Entity Framework Core debe respetar el esquema existente: **no ejecutar una migración inicial** que intente crear de nuevo las mismas tablas.
+El script `SoporteTecnicoDB.sql` crea la base de datos `SoporteTecnicoDB`, sus tablas y restricciones. Debe ejecutarse en un servidor donde esa base **aún no exista**: no comprueba si ya hay tablas y fallaría o dejaría el esquema a medias.
 
-El script debe ejecutarse sobre una base sin las tablas del sistema; si detecta tablas existentes, detiene la ejecución para no sobrescribir información.
+El esquema se mantiene con este script, no con migraciones. La configuración de Entity Framework Core respeta el esquema existente: **no ejecutar una migración inicial** que intente crear de nuevo las mismas tablas.
 
-### Datos semilla
+### Datos iniciales
 
-| Datos | Cantidad |
-|---|:---:|
-| Roles | 3 |
-| Usuarios | 5 |
-| Categorías | 5 |
-| Tickets | 4 |
-| Comentarios | 5 |
-| Registros de historial | 10 |
+El script solo inserta los tres roles (`Administrador`, `Tecnico`, `Solicitante`). **No crea usuarios, categorías ni tickets.**
 
-Los cuatro tickets de ejemplo cubren los cuatro estados previstos.
+Las contraseñas se generan con `PasswordHasher` (BL), por lo que los usuarios deben crearse a través de la aplicación (`UsuarioBL.RegistrarAsync`) y no insertando hashes manualmente en SQL.
 
-| Correo | Rol |
-|---|---|
-| `admin@soporte.test` | Administrador |
-| `carlos@soporte.test` | Técnico |
-| `ana@soporte.test` | Técnico |
-| `maria@soporte.test` | Solicitante |
-| `jose@soporte.test` | Solicitante |
+> **Pendiente de definir por el equipo:** cómo se crea el primer usuario administrador en una base nueva.
 
-> **Importante:** estos usuarios tienen el marcador `HASH_PENDIENTE` en `PasswordHash`, que no es un hash válido y no permite iniciar sesión. Antes de probar la autenticación, reemplazarlo por hashes generados con el mismo mecanismo que usa la aplicación.
+## Pruebas
 
-## Pruebas unitarias
+`SoporteTecnico.Tests` utiliza MSTest y sigue el patrón **Arrange, Act, Assert**.
 
-`SoporteTecnico.Tests` utiliza MSTest para verificar las reglas de negocio de forma aislada. Las pruebas **no dependen de SQL Server**: las interfaces de acceso a datos se sustituyen por dobles de prueba que controlan los datos y resultados.
+### Qué cubren hoy
 
-Las pruebas siguen el patrón **Arrange, Act, Assert**: preparar datos y dependencias simuladas, ejecutar el método y comprobar el resultado o la excepción esperada.
+Como las clases `*DAL` son estáticas y abren su propio contexto, la BL no puede aislarse de SQL Server. Las pruebas actuales cubren lo que la BL resuelve **antes** de acceder a datos:
+
+- Campos obligatorios, longitudes máximas y formato de correo.
+- Identificadores inválidos y actor no identificado.
+- Orden en que se aplican las validaciones.
+- `PasswordHasher`: formato, salt, verificación y hashes manipulados o mal formados.
+- Registro de los servicios de la BL en la inyección de dependencias.
+
+`DbContexto.ConnectionString` es `null` durante las pruebas. Si una validación esperada no se dispara y la ejecución llega al DAL, el test falla con una excepción distinta en lugar de tocar la base de datos.
 
 ### Organización
 
-| Clase | Casos previstos |
+| Clase | Casos cubiertos |
 |---|---|
-| `UsuarioBLTests` | Datos obligatorios, correo duplicado y desactivación de usuarios. |
-| `CategoriaBLTests` | Nombre obligatorio, nombre duplicado y desactivación de categorías. |
-| `TicketBLTests` | Creación, permisos, asignación de técnicos y transiciones de estado. |
-| `ComentarioBLTests` | Contenido obligatorio, permisos y restricciones de tickets cerrados. |
+| `UsuarioBLTests` | Registro, modificación, inicio de sesión y consultas: datos y parámetros inválidos. |
+| `CategoriaBLTests` | Nombre y descripción, identificadores inválidos en modificar, desactivar y reactivar. |
+| `TicketBLTests` | Datos del ticket y actor no identificado en cada operación. |
+| `ComentarioBLTests` | Ticket, autor y contenido del comentario. |
+| `PasswordHasherTests` | Generación y verificación de hashes. |
+| `RegistroBLTests` | Resolución de los servicios BL desde la inyección de dependencias. |
 
-### Casos principales
+`Auxiliares/Datos.cs` contiene constructores de entidades válidas y el verificador `AfirmarRegla`.
 
-- Crear un ticket con datos válidos.
-- Rechazar un ticket sin título o descripción.
-- Rechazar la asignación de un usuario que no sea técnico o de un técnico inactivo.
-- Impedir iniciar la atención sin técnico asignado.
-- Impedir resolver un ticket sin solución.
-- Impedir cerrar un ticket pendiente.
-- Impedir consultar tickets sin autorización.
-- Rechazar comentarios vacíos y comentarios en tickets cerrados.
-- Verificar que el cambio de estado solicite el registro del historial.
+### Pendiente (requiere base de datos)
 
-La persistencia real y la atomicidad de las transacciones se verifican con pruebas de integración, separadas de las unitarias.
+Estas reglas dependen de datos reales y se verificarán con **pruebas de integración** contra una base de prueba, separadas de las anteriores:
+
+- Permisos de acceso por rol a tickets y comentarios.
+- Asignación solo a técnicos activos y a tickets pendientes.
+- Transiciones de estado (iniciar, resolver, cerrar) y su historial.
+- Correos y nombres de categoría duplicados.
+- Categoría inactiva al crear un ticket.
+- Comentarios en tickets cerrados.
+- Atomicidad del cambio de estado y su historial.
 
 ### Ejecución
 
@@ -303,7 +321,7 @@ dotnet test
 
 ## Alcance de la primera versión
 
-Incluye la gestión básica de tickets, el control por roles y las pruebas unitarias de las reglas de negocio.
+Incluye la gestión básica de tickets, el control por roles y las pruebas de las reglas de negocio.
 
 Reservado para futuras versiones:
 
@@ -316,4 +334,4 @@ Reservado para futuras versiones:
 
 ## Contexto académico
 
-Proyecto desarrollado como práctica de arquitectura en capas, ASP.NET Core MVC, bases de datos relacionales y pruebas unitarias.
+Proyecto desarrollado como práctica de arquitectura en capas, ASP.NET Core MVC, bases de datos relacionales y pruebas.
