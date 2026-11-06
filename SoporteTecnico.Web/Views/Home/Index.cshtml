@@ -1,13 +1,94 @@
-﻿@using System.Security.Claims
+﻿@using SoporteTecnico.EN.Enumeraciones
+@model SoporteTecnico.Web.ViewModels.Home.HomeIndexViewModel
 @{
     ViewData["Title"] = "Inicio";
-    var rol = User.FindFirst(ClaimTypes.Role)?.Value;
+
+    int Pct(int valor) => Model.Total == 0 ? 0 : (int)Math.Round(valor * 100.0 / Model.Total);
 }
 
-<div class="card card-app hero-card text-white">
-    <div class="card-body p-4 p-md-5">
-        <span class="badge rounded-pill role-badge mb-3">@rol</span>
-        <h1 class="display-6 fw-bold mb-2">Bienvenido, @User.Identity?.Name</h1>
-        <p class="lead mb-0 opacity-75">Gestiona tus solicitudes de soporte desde un solo lugar.</p>
+<div class="page-header">
+    <div>
+        <h1>Inicio</h1>
+        <p class="subtitulo">Resumen de los tickets del sistema</p>
+    </div>
+    @if (User.IsInRole("Solicitante"))
+    {
+        <a class="btn btn-primary" asp-controller="Tickets" asp-action="Create">Nuevo ticket</a>
+    }
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card-app stat-card">
+            <div class="stat-label">Pendientes</div>
+            <div class="stat-value">@Model.Pendientes</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-app stat-card">
+            <div class="stat-label">En proceso</div>
+            <div class="stat-value">@Model.EnProceso</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-app stat-card">
+            <div class="stat-label">Resueltos</div>
+            <div class="stat-value">@Model.Resueltos</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="card-app stat-card">
+            <div class="stat-label">Cerrados</div>
+            <div class="stat-value">@Model.Cerrados</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card-app">
+            <h2 class="panel-title">Tickets recientes</h2>
+            @if (!Model.Recientes.Any())
+            {
+                <div class="text-center text-muted py-5 small">Todavía no hay tickets.</div>
+            }
+            else
+            {
+                foreach (var t in Model.Recientes)
+                {
+                    <a class="recent-item" asp-controller="Tickets" asp-action="Details" asp-route-id="@t.IdTicket">
+                        <div>
+                            <div class="titulo">@t.Titulo</div>
+                            <div class="meta">#@t.IdTicket &middot; @t.Categoria?.Nombre &middot; Prioridad @t.Prioridad.ToString().ToLower()</div>
+                        </div>
+                        <partial name="_EstadoBadge" model="t.Estado" />
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card-app">
+            <h2 class="panel-title">Tickets por estado</h2>
+            <div class="p-3 px-4">
+                <div class="bar-row">
+                    <div class="bar-head"><span>Pendiente</span><strong>@Model.Pendientes</strong></div>
+                    <div class="bar-track"><div class="bar-fill fill-pendiente" style="width:@(Pct(Model.Pendientes))%"></div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-head"><span>En proceso</span><strong>@Model.EnProceso</strong></div>
+                    <div class="bar-track"><div class="bar-fill fill-enproceso" style="width:@(Pct(Model.EnProceso))%"></div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-head"><span>Resuelto</span><strong>@Model.Resueltos</strong></div>
+                    <div class="bar-track"><div class="bar-fill fill-resuelto" style="width:@(Pct(Model.Resueltos))%"></div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-head"><span>Cerrado</span><strong>@Model.Cerrados</strong></div>
+                    <div class="bar-track"><div class="bar-fill fill-cerrado" style="width:@(Pct(Model.Cerrados))%"></div></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

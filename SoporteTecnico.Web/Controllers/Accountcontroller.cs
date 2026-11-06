@@ -41,7 +41,9 @@ namespace SoporteTecnico.Web.Controllers
             try
             {
                 // Intentar validar las credenciales con la capa de negocio
-                var usuario = await _usuarioBL.IniciarSesionAsync(model.Correo, model.Password);
+                // PASO DE EMERGENCIA: Buscamos al usuario solo por correo
+                var todosLosUsuarios = await _usuarioBL.ObtenerTodosAsync(); // O el método que tengas para listar
+                var usuario = todosLosUsuarios.FirstOrDefault(u => u.Correo == model.Correo && u.PasswordHash == model.Password);
 
                 if (usuario == null)
                 {

@@ -3,11 +3,11 @@
 @{
     var (clase, texto) = Model switch
     {
-        EstadoTicket.Pendiente => ("bg-warning text-dark", "Pendiente"),
-        EstadoTicket.EnProceso => ("bg-primary", "En proceso"),
-        EstadoTicket.Resuelto => ("bg-success", "Resuelto"),
-        EstadoTicket.Cerrado => ("bg-secondary", "Cerrado"),
-        _ => ("bg-light text-dark", Model.ToString())
+        EstadoTicket.Pendiente => ("estado-pendiente", "Pendiente"),
+        EstadoTicket.EnProceso => ("estado-enproceso", "En proceso"),
+        EstadoTicket.Resuelto => ("estado-resuelto", "Resuelto"),
+        EstadoTicket.Cerrado => ("estado-cerrado", "Cerrado"),
+        _ => ("estado-cerrado", Model.ToString())
     };
 }
-<span class="badge rounded-pill @clase">@texto</span>
+<span class="badge-estado @clase">@texto</span>

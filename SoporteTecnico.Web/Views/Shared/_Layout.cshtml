@@ -1,7 +1,11 @@
 ﻿@{
     var nombreUsuario = User.Identity?.Name ?? string.Empty;
-    var inicial = nombreUsuario.Length > 0 ? nombreUsuario.Substring(0, 1).ToUpper() : "?";
     var rolUsuario = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var autenticado = User.Identity?.IsAuthenticated == true;
+    var controlador = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    string Activo(string c) =>
+        string.Equals(controlador, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 }
 <!DOCTYPE html>
 <html lang="es">
@@ -10,78 +14,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Soporte Técnico</title>
     <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SoporteTecnico.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark navbar-app shadow-sm">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Soporte Técnico</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse justify-content-between">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
-                        </li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Tickets" asp-action="Index">Tickets</a>
-                            </li>
-                            @if (User.IsInRole("Administrador"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Categorias" asp-action="Index">Categorías</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
-                                </li>
-                            }
-                        }
-                    </ul>
-                    <ul class="navbar-nav align-items-sm-center gap-sm-3">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item d-flex align-items-center gap-2 text-white py-2 py-sm-0">
-                                <span class="user-avatar">@inicial</span>
-                                <span class="lh-sm">
-                                    <span class="d-block fw-semibold">@nombreUsuario</span>
-                                    <small class="text-white-50">@rolUsuario</small>
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
-                                </form>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
-                            </li>
-                        }
-                    </ul>
+    <div class="app-shell">
+        @if (autenticado)
+        {
+            <aside class="sidebar">
+                <a class="sidebar-brand" asp-controller="Home" asp-action="Index">
+                    <span class="brand-icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round">
+                            <path d="M4 5h8M4 8h8M4 11h5" />
+                        </svg>
+                    </span>
+                    Soporte
+                </a>
+
+                <nav class="sidebar-nav">
+                    <a class="sidebar-link @Activo("Home")" asp-controller="Home" asp-action="Index">Inicio</a>
+                    <a class="sidebar-link @Activo("Tickets")" asp-controller="Tickets" asp-action="Index">Tickets</a>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <a class="sidebar-link @Activo("Categorias")" asp-controller="Categorias" asp-action="Index">Categorías</a>
+                        <a class="sidebar-link @Activo("Usuarios")" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                    }
+                </nav>
+
+                <div class="sidebar-user">
+                    <div>
+                        <div class="nombre">@nombreUsuario</div>
+                        <div class="rol">@rolUsuario</div>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm w-100">Cerrar sesión</button>
+                    </form>
                 </div>
+            </aside>
+        }
+
+        <main role="main" class="app-main">
+            <div class="app-content">
+                <partial name="_Mensajes" />
+                @RenderBody()
             </div>
-        </nav>
-    </header>
-
-    <main role="main" class="container py-4">
-        <partial name="_Mensajes" />
-        @RenderBody()
-    </main>
-
-    <footer class="site-footer text-center text-muted small py-3">
-        <div class="container">
-            &copy; 2026 - Soporte Técnico
-        </div>
-    </footer>
+        </main>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
