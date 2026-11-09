@@ -40,24 +40,15 @@ namespace SoporteTecnico.Web.Controllers
 
             try
             {
-                // Intentar validar las credenciales con la capa de negocio
-                // PASO DE EMERGENCIA: Buscamos al usuario solo por correo
-                var todosLosUsuarios = await _usuarioBL.ObtenerTodosAsync(); // O el método que tengas para listar
-                var usuario = todosLosUsuarios.FirstOrDefault(u => u.Correo == model.Correo && u.PasswordHash == model.Password);
-
-                if (usuario == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Correo o contraseña incorrectos.");
-                    return View(model);
-                }
+                var usuario = await _usuarioBL.IniciarSesionAsync(model.Correo, model.Password);
 
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                    new Claim(ClaimTypes.Name, usuario.Nombre),
-                    new Claim(ClaimTypes.Email, usuario.Correo),
-                    new Claim(ClaimTypes.Role, ((RolUsuario)usuario.IdRol).ToString())
-                };
+    {
+        new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+        new Claim(ClaimTypes.Name, usuario.Nombre),
+        new Claim(ClaimTypes.Email, usuario.Correo),
+        new Claim(ClaimTypes.Role, ((RolUsuario)usuario.IdRol).ToString())
+    };
 
                 var identidad = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(
@@ -71,13 +62,12 @@ namespace SoporteTecnico.Web.Controllers
             }
             catch (ReglaNegocioException ex)
             {
-                // Errores controlados de lógica de negocio (ej. cuenta inactiva o credenciales inválidas)
+                // "Correo o contraseña incorrectos" o "El usuario está inactivo"
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return View(model);
             }
             catch (Exception ex)
             {
-                // Error técnico interno (ej. problemas con la base de datos o conexión MySQL)
                 _logger.LogError(ex, "Error crítico al iniciar sesión para el correo: {Correo}", model.Correo);
                 ModelState.AddModelError(string.Empty, "Ocurrió un error inesperado al conectar con la base de datos. Verifique su conexión.");
                 return View(model);
