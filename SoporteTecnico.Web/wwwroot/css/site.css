@@ -688,3 +688,497 @@ body {
     .timeline-item .m {
         color: var(--st-muted);
     }
+/* =====================================================
+   Rediseño Soporte Técnico (pantalla Inicio)
+   ===================================================== */
+:root {
+    --brand: #0f3d42;
+    --acento: #14808a;
+    --page: #d9e6e8;
+    --card: #f7fbfb;
+    --linea: #c3d6d9;
+    --muted: #4d6a72;
+}
+
+/* ---------- Menos blanco ---------- */
+body,
+.app-main {
+    background-color: var(--page);
+}
+
+.sidebar {
+    background-color: #e6f0f1;
+    border-right: 1px solid var(--linea);
+}
+
+.sidebar-link {
+    color: #3f5a61;
+}
+
+    .sidebar-link:hover {
+        background-color: #d3e5e7;
+        color: var(--brand);
+    }
+
+    .sidebar-link.active {
+        background-color: var(--acento);
+        color: #fff;
+        font-weight: 600;
+    }
+
+.sidebar-user {
+    border-top: 1px solid var(--linea);
+}
+
+.card-app {
+    background-color: var(--card);
+    border: 1px solid var(--linea);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(15, 61, 66, .08);
+    overflow: hidden;
+}
+
+/* ---------- Encabezado grande ---------- */
+.hero {
+    background-color: var(--brand);
+    border-radius: 16px;
+    padding: 28px 32px 88px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+    .hero h1 {
+        margin: 0;
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -.4px;
+    }
+
+    .hero p {
+        margin: 6px 0 0;
+        color: #b9d6d7;
+    }
+
+/* ---------- Contadores (montados sobre el encabezado) ---------- */
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: -56px 20px 20px;
+}
+
+.kpi {
+    background-color: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 8px 24px rgba(15, 61, 66, .16);
+}
+
+.kpi-ico {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .kpi-ico svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+.kpi-num {
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.kpi-txt {
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.kpi-pendiente .kpi-ico {
+    background: #fcefd2;
+    color: #8a5a00;
+}
+
+.kpi-enproceso .kpi-ico {
+    background: #dbe8f9;
+    color: #1a4480;
+}
+
+.kpi-resuelto .kpi-ico {
+    background: #d3efe0;
+    color: #0d5230;
+}
+
+.kpi-cerrado .kpi-ico {
+    background: #e4e9ef;
+    color: #334155;
+}
+
+/* ---------- Rejilla inferior ---------- */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 22px;
+    background-color: #e6f0f1;
+    border-bottom: 1px solid var(--linea);
+}
+
+.panel-h {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.panel-head a {
+    color: var(--acento);
+    font-weight: 700;
+    font-size: .85rem;
+    text-decoration: none;
+}
+
+/* ---------- Tabla de tickets recientes ---------- */
+.table-wrap {
+    overflow-x: auto;
+}
+
+.tabla-tickets {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .tabla-tickets th {
+        padding: 10px 14px;
+        text-align: left;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        color: var(--muted);
+        background-color: #eef5f5;
+    }
+
+    .tabla-tickets td {
+        padding: 13px 14px;
+        border-top: 1px solid #dbe7e9;
+        vertical-align: middle;
+    }
+
+    .tabla-tickets tbody tr:hover td {
+        background-color: #eaf4f4;
+    }
+
+    .tabla-tickets .col-id {
+        color: var(--muted);
+        font-weight: 700;
+    }
+
+.t-titulo {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .t-titulo:hover {
+        color: var(--acento);
+    }
+
+.prio {
+    font-weight: 700;
+}
+
+    .prio::before {
+        content: "● ";
+    }
+
+.prio-alta {
+    color: #b3360a;
+}
+
+.prio-media {
+    color: #8a5a00;
+}
+
+.prio-baja {
+    color: #2f6b3a;
+}
+
+/* ---------- Dona ---------- */
+.donut-box {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    padding: 22px;
+}
+
+.donut {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+    .donut::after {
+        content: "";
+        position: absolute;
+        inset: 26px;
+        border-radius: 50%;
+        background-color: var(--card);
+    }
+
+.donut-centro {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+    .donut-centro strong {
+        font-size: 1.8rem;
+        line-height: 1;
+    }
+
+    .donut-centro span {
+        font-size: .75rem;
+        color: var(--muted);
+    }
+
+.leyenda {
+    flex: 1;
+    min-width: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    .leyenda div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .leyenda i {
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .leyenda span {
+        flex: 1;
+    }
+
+    .leyenda small {
+        color: var(--muted);
+        width: 38px;
+        text-align: right;
+    }
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 991px) {
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =====================================================
+   Rediseño: resto de las vistas
+   ===================================================== */
+
+/* ---------- Encabezado compacto (listas) ---------- */
+.hero-sm {
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+    .hero-sm h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero-sm p {
+        margin: 4px 0 0;
+    }
+
+/* ---------- Etiquetas de estado ---------- */
+.estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+    .estado::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: currentColor;
+    }
+
+.estado-pendiente {
+    background: #fcefd2;
+    color: #6b4300;
+}
+
+.estado-enproceso {
+    background: #dbe8f9;
+    color: #1a4480;
+}
+
+.estado-resuelto {
+    background: #d3efe0;
+    color: #0d5230;
+}
+
+.estado-cerrado {
+    background: #e4e9ef;
+    color: #334155;
+}
+
+/* ---------- Tablas (Tickets, Categorías, Usuarios) ---------- */
+.card-app .table {
+    margin: 0;
+    --bs-table-bg: transparent;
+    --bs-table-hover-bg: #eaf4f4;
+}
+
+    .card-app .table > thead {
+        --bs-table-bg: #e6f0f1;
+        --bs-table-color: var(--muted);
+    }
+
+        .card-app .table > thead > tr > th {
+            padding: 12px 14px;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-bottom: 1px solid var(--linea);
+        }
+
+    .card-app .table > tbody > tr > td {
+        padding: 13px 14px;
+        border-color: #dbe7e9;
+        vertical-align: middle;
+    }
+
+/* ---------- Detalle del ticket ---------- */
+.card-app h2.h5,
+.card-app h2.h6 {
+    color: var(--brand);
+}
+
+.card-app .border.rounded-3 {
+    background-color: #eef5f5;
+    border-color: #d3e3e5 !important;
+}
+
+/* ---------- Formularios ---------- */
+.form-label {
+    font-weight: 600;
+    font-size: .85rem;
+    color: #2f4b52;
+}
+
+.form-control,
+.form-select {
+    background-color: #fff;
+    border: 1px solid #b9cfd3;
+    border-radius: 10px;
+    padding: .6rem .8rem;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--acento);
+        box-shadow: 0 0 0 .2rem rgba(20, 128, 138, .2);
+    }
+
+/* ---------- Botones ---------- */
+.btn-primary {
+    --bs-btn-bg: var(--acento);
+    --bs-btn-border-color: var(--acento);
+    --bs-btn-hover-bg: var(--brand);
+    --bs-btn-hover-border-color: var(--brand);
+    --bs-btn-active-bg: var(--brand);
+    --bs-btn-active-border-color: var(--brand);
+    --bs-btn-disabled-bg: var(--acento);
+    --bs-btn-disabled-border-color: var(--acento);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--acento);
+    --bs-btn-border-color: var(--acento);
+    --bs-btn-hover-bg: var(--acento);
+    --bs-btn-hover-border-color: var(--acento);
+    --bs-btn-active-bg: var(--acento);
+    --bs-btn-active-border-color: var(--acento);
+}
+
+/* ---------- Mensajes ---------- */
+.alert {
+    border-radius: 12px;
+    border-style: solid;
+    border-width: 0 0 0 4px;
+}
+
+.alert-success {
+    background: #dff3e8;
+    border-color: #26a065;
+    color: #0d5230;
+}
+
+.alert-danger {
+    background: #fbe4de;
+    border-color: #c2410c;
+    color: #7a1f06;
+}
+
+/* ---------- Login y acceso denegado ---------- */
+.auth-card {
+    border-top: 5px solid var(--acento);
+}
+
+.brand-badge {
+    background: var(--brand);
+}
+
+.auth-wrapper h1 {
+    color: var(--brand);
+}

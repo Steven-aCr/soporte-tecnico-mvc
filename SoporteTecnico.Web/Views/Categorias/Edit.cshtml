@@ -3,12 +3,18 @@
     ViewData["Title"] = "Editar categoría";
 }
 
+<section class="hero hero-sm">
+    <div>
+        <h1>Editar categoría</h1>
+        <p>Actualiza los datos de la categoría</p>
+    </div>
+    <a class="btn btn-light" asp-action="Index">&larr; Volver</a>
+</section>
+
 <div class="row justify-content-center">
     <div class="col-lg-6">
-        <div class="card card-app">
-            <div class="card-body p-4 p-md-5">
-                <h1 class="h4 fw-bold mb-4">Editar categoría</h1>
-
+        <div class="card-app">
+            <div class="p-4 p-md-5">
                 <form asp-action="Edit" asp-route-id="@Model.IdCategoria" method="post">
                     <input type="hidden" asp-for="IdCategoria" />
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>

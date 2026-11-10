@@ -3,10 +3,10 @@
 @{
     var (clase, texto) = Model switch
     {
-        PrioridadTicket.Alta => ("prioridad-alta", "Alta"),
-        PrioridadTicket.Media => ("prioridad-media", "Media"),
-        PrioridadTicket.Baja => ("prioridad-baja", "Baja"),
-        _ => ("prioridad-baja", Model.ToString())
+        PrioridadTicket.Alta => ("prio-alta", "Alta"),
+        PrioridadTicket.Media => ("prio-media", "Media"),
+        PrioridadTicket.Baja => ("prio-baja", "Baja"),
+        _ => ("prio-media", Model.ToString())
     };
 }
-<span class="badge-estado @clase">@texto</span>
+<span class="prio @clase">@texto</span>

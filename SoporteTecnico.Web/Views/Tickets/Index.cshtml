@@ -4,16 +4,16 @@
     ViewData["Title"] = "Tickets";
 }
 
-<div class="page-header">
+<section class="hero hero-sm">
     <div>
         <h1>Tickets</h1>
-        <p class="subtitulo">@Model.Tickets.Count ticket(s) en la lista</p>
+        <p>Consulta y da seguimiento a las solicitudes de soporte</p>
     </div>
     @if (User.IsInRole("Solicitante"))
     {
-        <a class="btn btn-primary" asp-action="Create">Nuevo ticket</a>
+        <a class="btn btn-light" asp-action="Create">Nuevo ticket</a>
     }
-</div>
+</section>
 
 <form method="get" asp-action="Index" class="row g-2 mb-3">
     <div class="col-sm-5 col-md-3">
@@ -27,10 +27,10 @@
     </div>
 </form>
 
-<div class="card-app overflow-hidden">
+<div class="card-app">
     @if (!Model.Tickets.Any())
     {
-        <div class="text-center text-muted py-5 small">No hay tickets para mostrar.</div>
+        <div class="text-center text-muted py-5">No hay tickets para mostrar.</div>
     }
     else
     {
@@ -52,16 +52,16 @@
                     @foreach (var t in Model.Tickets)
                     {
                         <tr>
-                            <td class="text-muted">@t.IdTicket</td>
+                            <td class="text-muted fw-semibold">@t.IdTicket</td>
                             <td>
-                                <a class="fw-semibold text-decoration-none" asp-action="Details" asp-route-id="@t.IdTicket">@t.Titulo</a>
+                                <a class="t-titulo" asp-action="Details" asp-route-id="@t.IdTicket">@t.Titulo</a>
                             </td>
                             <td>@t.Categoria?.Nombre</td>
                             <td><partial name="_PrioridadBadge" model="t.Prioridad" /></td>
                             <td><partial name="_EstadoBadge" model="t.Estado" /></td>
                             <td>@t.Solicitante?.Nombre</td>
                             <td>@(t.Tecnico?.Nombre ?? "Sin asignar")</td>
-                            <td class="text-nowrap text-muted">@t.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-nowrap">@t.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         </tr>
                     }
                 </tbody>

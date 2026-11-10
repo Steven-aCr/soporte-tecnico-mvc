@@ -5,9 +5,6 @@
     ViewData["Title"] = $"Ticket #{t.IdTicket}";
     var hayAcciones = Model.PuedeAsignar || Model.PuedeIniciar || Model.PuedeResolver || Model.PuedeCerrar;
 
-    var pasos = new[] { EstadoTicket.Pendiente, EstadoTicket.EnProceso, EstadoTicket.Resuelto, EstadoTicket.Cerrado };
-    var pasoActual = Array.IndexOf(pasos, t.Estado) + 1;
-
     string NombreEstado(EstadoTicket e) => e switch
     {
         EstadoTicket.Pendiente => "Pendiente",
@@ -16,54 +13,33 @@
         EstadoTicket.Cerrado => "Cerrado",
         _ => e.ToString()
     };
-
-    string Iniciales(string? nombre)
-    {
-        if (string.IsNullOrWhiteSpace(nombre)) return "?";
-        var partes = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return partes.Length == 1
-            ? partes[0].Substring(0, 1).ToUpper()
-            : (partes[0].Substring(0, 1) + partes[1].Substring(0, 1)).ToUpper();
-    }
 }
 
-<div class="mb-3">
-    <a asp-action="Index" class="back-link text-decoration-none">&larr; Volver a tickets</a>
-</div>
-
-<div class="page-header">
+<section class="hero hero-sm">
     <div>
-        <h1>@t.Titulo</h1>
-        <p class="subtitulo">Ticket #@t.IdTicket &middot; @t.Categoria?.Nombre &middot; Prioridad @t.Prioridad.ToString().ToLower()</p>
+        <h1>Ticket #@t.IdTicket</h1>
+        <p>@t.Titulo</p>
     </div>
-</div>
+    <a class="btn btn-light" asp-action="Index">&larr; Volver a tickets</a>
+</section>
 
-<div class="card-app mb-3">
-    <div class="stepper">
-        @for (var i = 0; i < pasos.Length; i++)
-        {
-            var n = i + 1;
-            var clase = n < pasoActual ? "done" : (n == pasoActual ? "current" : "");
-            <div class="step @clase">
-                <span class="step-dot">@n</span>
-                <span class="step-label">@NombreEstado(pasos[i])</span>
-            </div>
-        }
-    </div>
-</div>
-
-<div class="row g-3">
+<div class="row g-4">
     <div class="col-lg-8">
 
-        <div class="card-app mb-3">
+        <div class="card-app mb-4">
             <div class="p-4">
-                <h2 class="h6 mb-2">Descripción</h2>
-                <p class="small mb-0" style="white-space: pre-line">@t.Descripcion</p>
+                <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                    <partial name="_EstadoBadge" model="t.Estado" />
+                    <span class="small text-muted">Prioridad: <partial name="_PrioridadBadge" model="t.Prioridad" /></span>
+                </div>
+
+                <h2 class="h6 text-muted">Descripción</h2>
+                <p style="white-space: pre-line">@t.Descripcion</p>
 
                 @if (!string.IsNullOrWhiteSpace(t.Solucion))
                 {
-                    <div class="alert alert-success mt-3 mb-0">
-                        <h2 class="h6 fw-bold">Solución aplicada</h2>
+                    <div class="alert alert-success mb-0">
+                        <h2 class="h6 fw-bold">Solución</h2>
                         <div style="white-space: pre-line">@t.Solucion</div>
                     </div>
                 }
@@ -72,25 +48,22 @@
 
         <div class="card-app">
             <div class="p-4">
-                <h2 class="h6 mb-3">Comentarios</h2>
+                <h2 class="h5 fw-bold mb-3">Comentarios</h2>
 
                 @if (!Model.Comentarios.Any())
                 {
-                    <p class="text-muted small">Todavía no hay comentarios.</p>
+                    <p class="text-muted">Todavía no hay comentarios.</p>
                 }
                 else
                 {
                     foreach (var c in Model.Comentarios)
                     {
-                        <div class="comment">
-                            <span class="comment-avatar">@Iniciales(c.Usuario?.Nombre)</span>
-                            <div>
-                                <div>
-                                    <span class="autor">@c.Usuario?.Nombre</span>
-                                    <span class="fecha">@c.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
-                                </div>
-                                <div class="texto">@c.Contenido</div>
+                        <div class="border rounded-3 p-3 mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="fw-semibold">@c.Usuario?.Nombre</span>
+                                <span class="text-muted">@c.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
                             </div>
+                            <div style="white-space: pre-line">@c.Contenido</div>
                         </div>
                     }
                 }
@@ -98,9 +71,13 @@
                 @if (Model.PuedeComentar)
                 {
                     <form asp-action="Comentar" asp-route-id="@t.IdTicket" method="post" class="mt-3">
-                        <label class="form-label" for="contenido">Agregar comentario</label>
-                        <textarea name="contenido" id="contenido" class="form-control mb-2" rows="3" maxlength="2000" required></textarea>
-                        <button type="submit" class="btn btn-primary">Comentar</button>
+                        <div class="mb-2">
+                            <textarea name="contenido" class="form-control" rows="3" maxlength="2000"
+                                      placeholder="Escribe un comentario..." required></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary btn-sm">Comentar</button>
+                        </div>
                     </form>
                 }
                 else
@@ -113,32 +90,39 @@
 
     <div class="col-lg-4">
 
-        <div class="card-app mb-3">
+        <div class="card-app mb-4">
             <div class="p-4">
-                <h2 class="h6 mb-2">Detalles</h2>
-                <div class="detail-row"><span class="k">Solicitante</span><span class="v">@t.Solicitante?.Nombre</span></div>
-                <div class="detail-row"><span class="k">Técnico</span><span class="v">@(t.Tecnico?.Nombre ?? "Sin asignar")</span></div>
-                <div class="detail-row"><span class="k">Categoría</span><span class="v">@t.Categoria?.Nombre</span></div>
-                <div class="detail-row"><span class="k">Prioridad</span><span class="v"><partial name="_PrioridadBadge" model="t.Prioridad" /></span></div>
-                <div class="detail-row"><span class="k">Creado</span><span class="v">@t.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span></div>
-                @if (t.FechaCierre.HasValue)
-                {
-                    <div class="detail-row"><span class="k">Cerrado</span><span class="v">@t.FechaCierre.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span></div>
-                }
+                <h2 class="h6 fw-bold mb-3">Información</h2>
+                <dl class="mb-0 small">
+                    <dt class="text-muted fw-normal">Solicitante</dt>
+                    <dd>@t.Solicitante?.Nombre</dd>
+                    <dt class="text-muted fw-normal">Técnico</dt>
+                    <dd>@(t.Tecnico?.Nombre ?? "Sin asignar")</dd>
+                    <dt class="text-muted fw-normal">Categoría</dt>
+                    <dd>@t.Categoria?.Nombre</dd>
+                    <dt class="text-muted fw-normal">Creado</dt>
+                    <dd>@t.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                    @if (t.FechaCierre.HasValue)
+                    {
+                        <dt class="text-muted fw-normal">Cerrado</dt>
+                        <dd class="mb-0">@t.FechaCierre.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                    }
+                </dl>
             </div>
         </div>
 
         @if (hayAcciones)
         {
-            <div class="card-app mb-3">
+            <div class="card-app mb-4">
                 <div class="p-4">
+                    <h2 class="h6 fw-bold mb-3">Acciones</h2>
+
                     @if (Model.PuedeAsignar)
                     {
-                        <h2 class="h6 mb-3">Asignar ticket</h2>
                         <form asp-action="Asignar" asp-route-id="@t.IdTicket" method="post">
                             @if (Model.Tecnicos.Any())
                             {
-                                <label class="form-label" for="idTecnico">Técnico</label>
+                                <label class="form-label small" for="idTecnico">Asignar técnico</label>
                                 <select name="idTecnico" id="idTecnico" class="form-select mb-2" required>
                                     <option value="">Seleccione un técnico</option>
                                     @foreach (var tec in Model.Tecnicos)
@@ -157,7 +141,6 @@
 
                     @if (Model.PuedeIniciar)
                     {
-                        <h2 class="h6 mb-3">Atender ticket</h2>
                         <form asp-action="Iniciar" asp-route-id="@t.IdTicket" method="post">
                             <button type="submit" class="btn btn-primary w-100">Iniciar trabajo</button>
                         </form>
@@ -165,20 +148,19 @@
 
                     @if (Model.PuedeResolver)
                     {
-                        <h2 class="h6 mb-3">Resolver ticket</h2>
                         <form asp-action="Resolver" asp-route-id="@t.IdTicket" method="post">
-                            <label class="form-label" for="solucion">Solución aplicada</label>
-                            <textarea name="solucion" id="solucion" class="form-control mb-2" rows="4" maxlength="2000" required></textarea>
+                            <label class="form-label small" for="solucion">Solución</label>
+                            <textarea name="solucion" id="solucion" class="form-control mb-2" rows="4"
+                                      maxlength="2000" required></textarea>
                             <button type="submit" class="btn btn-success w-100">Marcar como resuelto</button>
                         </form>
                     }
 
                     @if (Model.PuedeCerrar)
                     {
-                        <h2 class="h6 mb-3 @(Model.PuedeAsignar || Model.PuedeIniciar || Model.PuedeResolver ? "mt-4" : "")">Cerrar ticket</h2>
                         <form asp-action="Cerrar" asp-route-id="@t.IdTicket" method="post"
                               onsubmit="return confirm('¿Cerrar el ticket? Ya no se podrá comentar.');">
-                            <button type="submit" class="btn btn-outline-secondary w-100">Cerrar ticket</button>
+                            <button type="submit" class="btn btn-secondary w-100">Cerrar ticket</button>
                         </form>
                     }
                 </div>
@@ -187,29 +169,33 @@
 
         <div class="card-app">
             <div class="p-4">
-                <h2 class="h6 mb-3">Historial</h2>
+                <h2 class="h6 fw-bold mb-3">Historial de estados</h2>
                 @if (!Model.Historial.Any())
                 {
                     <p class="text-muted small mb-0">Sin movimientos.</p>
                 }
                 else
                 {
-                    foreach (var h in Model.Historial)
-                    {
-                        <div class="timeline-item">
-                            <div class="t">
-                                @if (h.EstadoAnterior == null)
-                                {
-                                    <span>Ticket creado</span>
-                                }
-                                else
-                                {
-                                    <span>@NombreEstado((EstadoTicket)h.EstadoAnterior.Value) &rarr; @NombreEstado((EstadoTicket)h.EstadoNuevo)</span>
-                                }
-                            </div>
-                            <div class="m">@h.Usuario?.Nombre &middot; @h.FechaCambio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
-                        </div>
-                    }
+                    <ul class="list-unstyled mb-0 small">
+                        @foreach (var h in Model.Historial)
+                        {
+                            <li class="mb-3">
+                                <div class="fw-semibold">
+                                    @if (h.EstadoAnterior == null)
+                                    {
+                                        <span>Ticket creado</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@NombreEstado((EstadoTicket)h.EstadoAnterior.Value) &rarr; @NombreEstado((EstadoTicket)h.EstadoNuevo)</span>
+                                    }
+                                </div>
+                                <div class="text-muted">
+                                    @h.Usuario?.Nombre &middot; @h.FechaCambio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </li>
+                        }
+                    </ul>
                 }
             </div>
         </div>

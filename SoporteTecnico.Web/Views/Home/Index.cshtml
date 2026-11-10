@@ -4,91 +4,108 @@
     ViewData["Title"] = "Inicio";
 
     int Pct(int valor) => Model.Total == 0 ? 0 : (int)Math.Round(valor * 100.0 / Model.Total);
+
+    int pPend = Pct(Model.Pendientes);
+    int pProc = Pct(Model.EnProceso);
+    int pRes  = Pct(Model.Resueltos);
+    int pCer  = Pct(Model.Cerrados);
+
+    int a = pPend;
+    int b = a + pProc;
+    int c = b + pRes;
+
+    string dona = Model.Total == 0
+        ? "conic-gradient(#cfdee0 0 100%)"
+        : $"conic-gradient(#d9922b 0 {a}%, #3b7bc4 {a}% {b}%, #26a065 {b}% {c}%, #6b7c93 {c}% 100%)";
 }
 
-<div class="page-header">
+<section class="hero">
     <div>
         <h1>Inicio</h1>
-        <p class="subtitulo">Resumen de los tickets del sistema</p>
+        <p>Resumen de los tickets del sistema</p>
     </div>
     @if (User.IsInRole("Solicitante"))
     {
-        <a class="btn btn-primary" asp-controller="Tickets" asp-action="Create">Nuevo ticket</a>
+        <a class="btn btn-light" asp-controller="Tickets" asp-action="Create">Nuevo ticket</a>
     }
-</div>
+</section>
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3">
-        <div class="card-app stat-card">
-            <div class="stat-label">Pendientes</div>
-            <div class="stat-value">@Model.Pendientes</div>
-        </div>
+<div class="kpi-row">
+    <div class="kpi kpi-pendiente">
+        <span class="kpi-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span>
+        <div><div class="kpi-num">@Model.Pendientes</div><div class="kpi-txt">Pendientes</div></div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card-app stat-card">
-            <div class="stat-label">En proceso</div>
-            <div class="stat-value">@Model.EnProceso</div>
-        </div>
+    <div class="kpi kpi-enproceso">
+        <span class="kpi-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" /></svg></span>
+        <div><div class="kpi-num">@Model.EnProceso</div><div class="kpi-txt">En proceso</div></div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card-app stat-card">
-            <div class="stat-label">Resueltos</div>
-            <div class="stat-value">@Model.Resueltos</div>
-        </div>
+    <div class="kpi kpi-resuelto">
+        <span class="kpi-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7" /></svg></span>
+        <div><div class="kpi-num">@Model.Resueltos</div><div class="kpi-txt">Resueltos</div></div>
     </div>
-    <div class="col-6 col-lg-3">
-        <div class="card-app stat-card">
-            <div class="stat-label">Cerrados</div>
-            <div class="stat-value">@Model.Cerrados</div>
-        </div>
+    <div class="kpi kpi-cerrado">
+        <span class="kpi-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
+        <div><div class="kpi-num">@Model.Cerrados</div><div class="kpi-txt">Cerrados</div></div>
     </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-lg-7">
-        <div class="card-app">
-            <h2 class="panel-title">Tickets recientes</h2>
-            @if (!Model.Recientes.Any())
-            {
-                <div class="text-center text-muted py-5 small">Todavía no hay tickets.</div>
-            }
-            else
-            {
-                foreach (var t in Model.Recientes)
-                {
-                    <a class="recent-item" asp-controller="Tickets" asp-action="Details" asp-route-id="@t.IdTicket">
-                        <div>
-                            <div class="titulo">@t.Titulo</div>
-                            <div class="meta">#@t.IdTicket &middot; @t.Categoria?.Nombre &middot; Prioridad @t.Prioridad.ToString().ToLower()</div>
-                        </div>
-                        <partial name="_EstadoBadge" model="t.Estado" />
-                    </a>
-                }
-            }
+<div class="home-grid">
+    <section class="card-app">
+        <div class="panel-head">
+            <h2 class="panel-h">Tickets recientes</h2>
+            <a asp-controller="Tickets" asp-action="Index">Ver todos</a>
         </div>
-    </div>
 
-    <div class="col-lg-5">
-        <div class="card-app">
-            <h2 class="panel-title">Tickets por estado</h2>
-            <div class="p-3 px-4">
-                <div class="bar-row">
-                    <div class="bar-head"><span>Pendiente</span><strong>@Model.Pendientes</strong></div>
-                    <div class="bar-track"><div class="bar-fill fill-pendiente" style="width:@(Pct(Model.Pendientes))%"></div></div>
-                </div>
-                <div class="bar-row">
-                    <div class="bar-head"><span>En proceso</span><strong>@Model.EnProceso</strong></div>
-                    <div class="bar-track"><div class="bar-fill fill-enproceso" style="width:@(Pct(Model.EnProceso))%"></div></div>
-                </div>
-                <div class="bar-row">
-                    <div class="bar-head"><span>Resuelto</span><strong>@Model.Resueltos</strong></div>
-                    <div class="bar-track"><div class="bar-fill fill-resuelto" style="width:@(Pct(Model.Resueltos))%"></div></div>
-                </div>
-                <div class="bar-row">
-                    <div class="bar-head"><span>Cerrado</span><strong>@Model.Cerrados</strong></div>
-                    <div class="bar-track"><div class="bar-fill fill-cerrado" style="width:@(Pct(Model.Cerrados))%"></div></div>
-                </div>
+        @if (!Model.Recientes.Any())
+        {
+            <div class="text-center text-muted py-5 small">Todavía no hay tickets.</div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="tabla-tickets">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Título</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Prioridad</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.Recientes)
+                        {
+                            <tr>
+                                <td class="col-id">@t.IdTicket</td>
+                                <td>
+                                    <a class="t-titulo" asp-controller="Tickets" asp-action="Details" asp-route-id="@t.IdTicket">@t.Titulo</a>
+                                </td>
+                                <td>@t.Categoria?.Nombre</td>
+                                <td><span class="prio prio-@t.Prioridad.ToString().ToLower()">@t.Prioridad</span></td>
+                                <td><partial name="_EstadoBadge" model="t.Estado" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </section>
+
+    <section class="card-app">
+        <div class="panel-head">
+            <h2 class="panel-h">Tickets por estado</h2>
+        </div>
+        <div class="donut-box">
+            <div class="donut" style="background:@Html.Raw(dona)">
+                <div class="donut-centro"><strong>@Model.Total</strong><span>tickets</span></div>
+            </div>
+            <div class="leyenda">
+                <div><i style="background:#d9922b"></i><span>Pendiente</span><strong>@Model.Pendientes</strong><small>@pPend%</small></div>
+                <div><i style="background:#3b7bc4"></i><span>En proceso</span><strong>@Model.EnProceso</strong><small>@pProc%</small></div>
+                <div><i style="background:#26a065"></i><span>Resuelto</span><strong>@Model.Resueltos</strong><small>@pRes%</small></div>
+                <div><i style="background:#6b7c93"></i><span>Cerrado</span><strong>@Model.Cerrados</strong><small>@pCer%</small></div>
             </div>
         </div>
-    </div>
+    </section>
 </div>

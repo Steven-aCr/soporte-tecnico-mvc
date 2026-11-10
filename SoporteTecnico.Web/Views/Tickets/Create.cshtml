@@ -4,12 +4,18 @@
     ViewData["Title"] = "Nuevo ticket";
 }
 
+<section class="hero hero-sm">
+    <div>
+        <h1>Nuevo ticket</h1>
+        <p>Cuéntanos qué necesitas y lo atenderemos</p>
+    </div>
+    <a class="btn btn-light" asp-action="Index">&larr; Volver</a>
+</section>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card card-app">
-            <div class="card-body p-4 p-md-5">
-                <h1 class="h4 fw-bold mb-4">Nuevo ticket</h1>
-
+        <div class="card-app">
+            <div class="p-4 p-md-5">
                 <form asp-action="Create" method="post">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
 

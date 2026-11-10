@@ -4,21 +4,24 @@
     var idActual = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h1 class="h4 fw-bold mb-0">Usuarios</h1>
-    <a class="btn btn-primary" asp-action="Create">Nuevo usuario</a>
-</div>
+<section class="hero hero-sm">
+    <div>
+        <h1>Usuarios</h1>
+        <p>Administra las cuentas y sus roles</p>
+    </div>
+    <a class="btn btn-light" asp-action="Create">Nuevo usuario</a>
+</section>
 
-<div class="card card-app">
+<div class="card-app">
     @if (!Model.Any())
     {
-        <div class="card-body text-center text-muted py-5">No hay usuarios registrados.</div>
+        <div class="text-center text-muted py-5">No hay usuarios registrados.</div>
     }
     else
     {
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>Nombre</th>
                         <th>Correo</th>
@@ -38,11 +41,11 @@
                             <td>
                                 @if (u.Activo)
                                 {
-                                    <span class="badge rounded-pill bg-success">Activo</span>
+                                    <span class="estado estado-resuelto">Activo</span>
                                 }
                                 else
                                 {
-                                    <span class="badge rounded-pill bg-secondary">Inactivo</span>
+                                    <span class="estado estado-cerrado">Inactivo</span>
                                 }
                             </td>
                             <td class="text-end text-nowrap">
